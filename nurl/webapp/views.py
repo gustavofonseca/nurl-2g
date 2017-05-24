@@ -47,8 +47,7 @@ def url_shortener(request):
 
 @view_config(route_name='shortened')
 def short_ref_resolver(request):
-    access = Access(datetime=datetime.utcnow(), referrer=request.referrer,
-            browser=request.user_agent)
+    access = Access(utctime=datetime.utcnow(), referrer=request.referrer)
     try:
         plain_url = request.nurl.resolve(request.matchdict['short_ref'],
                 access=access)
@@ -56,4 +55,15 @@ def short_ref_resolver(request):
         raise httpexceptions.HTTPNotFound() from None
 
     raise httpexceptions.HTTPMovedPermanently(plain_url)
+
+
+@view_config(route_name='analytics_v1', renderer='jsonp')
+def short_ref_analytics(request):
+
+    accesses = (access._asdict()
+                for access in request.tracker.get(
+                    request.matchdict['short_ref']))
+
+    return [{'utctime': a['datetime'].isoformat(), 'referrer': a['referrer']}
+            for a in accesses]
 

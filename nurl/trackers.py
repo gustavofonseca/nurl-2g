@@ -7,7 +7,7 @@ import logging
 LOGGER = logging.getLogger(__name__)
 
 
-Access = namedtuple('Access', 'datetime referrer browser')
+Access = namedtuple('Access', 'utctime referrer')
 
 
 class Tracker(metaclass=abc.ABCMeta):
@@ -53,7 +53,6 @@ class MongoDBTracker(Tracker):
         records = self.collection.find({'short_ref': short_ref})
         for rec in records:
             access = Access(datetime=rec['datetime'],
-                            referrer=rec['referrer'],
-                            browser=rec['browser'])
+                            referrer=rec['referrer'])
             yield access
         
